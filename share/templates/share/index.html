@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title> Share Link</title>
+
+	<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+	
+
+	<style type="text/css">
+		
+
+		body {
+		    background: #f9f9f9
+		}
+
+		.name {
+		    color: blue
+		}
+
+		.work {
+		    /*font-weight: bold;*/
+		    font-size: 15px
+		}
+
+		.about span {
+		    font-size: 13px
+		}
+
+		.but_right {
+		    float: right;
+		}
+
+		.v-profile {
+		    color: blue;
+		    cursor: pointer
+		}
+
+		.box {
+		    -webkit-box-shadow: 13px 12px 5px -10px rgba(196, 194, 196, 0.72);
+		    -moz-box-shadow: 13px 12px 5px -10px rgba(196, 194, 196, 0.72);
+		    box-shadow: 13px 12px 5px -10px rgba(196, 194, 196, 0.72)
+		}
+
+	</style>
+</head>
+<body>
+
+
+
+<div class="container" style="width: 50%; margin: 30 45;">
+
+
+	<div class="container text-center mb-2">
+	    <h1 class="mb-0">Meet our team</h1><span> </span>
+	</div><br><br>
+
+
+	{% for a in doc %}
+	<div class="container mt-3">
+	    <div class="row">
+	        <div class="col-md-4 col-sm-12">
+	            <div class="bg-white p-3 text-center rounded box">      
+
+	                <div class="mt-4 about" >
+	                	<span>
+	                	{{a.doc_name}}
+	               		</span>
+	               	</div>
+	            </div>
+	        </div>
+
+	        <div>
+	        	<!-- <button> Generate link</button> -->
+	        	<a class="fcc-btn genrate" id="{{a.doc_name}}" style="background-color: #199319; color: white; padding: 10px; cursor:pointer;">Generate link
+	        	</a>  
+	        </div>
+	    </div>
+	</div>
+	{% endfor %}
+
+
+<!-- modal -->
+	<div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+        
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+
+              <h4 class="modal-title" style="cursor:pointer;">Generate Link</h4>
+            </div>
+            <div class="modal-body">
+
+            	<form method="POST" enctype="multipart/form-data" id='form'>
+            		{% csrf_token %}
+
+            		<div class="card-body">
+		              <div class="form-group">
+		              	<label for="InputTitle">Link</label>
+		                  <input type="text" class="form-control" id="url" name="url">
+		              </div>
+
+		              <div class="form-group">
+		                  <label for="InputTitle">Add user emails</label>
+		                  <input type="email" class="form-control" id="email" name="email" multiple>
+		              </div>
+		            </div>
+
+            	</form>
+
+            <div class="modal-footer">
+            	<button type="button" id="cancel" class="btn btn-default" >Cancel</button>
+              <button type="button" id="copy" class="btn btn-primary but_right" >Copy Link</button>
+              <p> </p>
+              <button type="button" id="send" class="btn btn-success but_right" value="" data-dismiss="modal">Send Link</button>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+
+</div>
+
+
+<script>
+
+$(document).ready(function(){
+
+	$('.genrate').click(function(e){
+		e.preventDefault();
+		var vl = $(this).attr('id')
+		$('#url').val(window.location.href + '?share='+vl)
+		$('#myModal').modal('toggle')
+        $('#myModal').modal('show')
+	})
+
+
+// cpoy document
+	$('#copy').click(function(){
+		var Url = document.getElementById("url");
+	  	Url.select();
+	  	document.execCommand("copy");
+	})
+
+
+
+	$('#send').click(function(e){
+		e.preventDefault();
+        var data = new FormData($('#form').get(0));
+        var token = '{{csrf_token}}';
+        $.ajax({
+            url: "/sendlink", // same url 'action' in form
+            type: 'POST',
+            headers: { "X-CSRFToken": token },
+            data: data,
+            contentType: 'multipart/form-data',
+            processData: false,
+            contentType: false,
+            success: function(data) {
+                if(data=="done"){
+                    window.location.href="/"
+
+                }
+                else{
+                     window.location.href="/docs"   
+                }
+      }
+      })
+      return false;
+  })
+
+
+  })
+
+</script>
+</body>
+</html>
